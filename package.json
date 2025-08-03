@@ -1,0 +1,11 @@
+{
+  "name": "eczane-mesaj",
+  "version": "1.0.0",
+  "description": "EczaneMesaj projesi için temel package.json dosyası.",
+  "main": "backend/index.js",
+  "scripts": {
+    "start": "node backend/index.js"
+  },
+  "author": "",
+  "license": "ISC"
+}

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>SmartPharm - Hatırlatıcı Kayıt</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f6fb;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+    .main-flex {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 32px;
+      margin: 40px auto;
+      max-width: 950px;
+    }
+    .container {
+      background: #fff;
+      width: 400px;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      padding: 32px 28px 24px 28px;
+      min-width: 320px;
+    }
+    .side-panel {
+      background: #fff;
+      width: 340px;
+      min-width: 240px;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      padding: 24px 18px 18px 18px;
+      display: none;
+      flex-direction: column;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .side-panel.active {
+      display: flex;
+    }
+    h1 {
+      color: #2a5d9f;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .desc {
+      color: #555;
+      font-size: 15px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #234;
+      font-weight: 500;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 16px;
+      border: 1px solid #cfd8dc;
+      border-radius: 6px;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+    input[type="checkbox"] {
+      width: auto;
+      margin-right: 6px;
+    }
+    .days-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      margin-bottom: 16px;
+    }
+    .days-group label {
+      display: flex;
+      align-items: center;
+      font-weight: 400;
+      margin-bottom: 0;
+      color: #345;
+      font-size: 14px;
+    }
+    button {
+      background: #2a5d9f;
+      color: #fff;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #1b3e6f;
+    }
+    #result {
+      text-align: center;
+      margin-top: 10px;
+      font-weight: 500;
+      color: #2a5d9f;
+    }
+    @media (max-width: 900px) {
+      .main-flex { flex-direction: column; align-items: stretch; gap: 0; }
+      .side-panel { width: 100%; max-width: 100vw; min-width: 0; margin-top: 24px; }
+      .container { width: 100%; min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-flex">
+    <div class="container">
+      <h1>Marmara Eczanesi</h1>
+      <div class="desc">Müşterileriniz için otomatik ve güvenli WhatsApp bilgilendirme hizmeti</div>
+      <button id="showRemindersBtn" style="width:100%;margin-bottom:18px;background:#fff;color:#2a5d9f;border:1.5px solid #2a5d9f;">Önceden Ayarlanmış Müşterileri Göster</button>
+      <form id="reminderForm">
+        <label>İsim
+          <input type="text" name="name" required>
+        </label>
+        <label>Telefon
+          <input type="text" name="phone" required placeholder="5XXXXXXXXX">
+        </label>
+        <label>Mesaj
+          <input type="text" name="message" required placeholder="İlaç adını ve mesajı yazın">
+        </label>
+        <label>Başlangıç Tarihi ve Saati
+          <input type="datetime-local" name="startDateTime" required>
+        </label>
+        <label>Tekrar Tipi
+          <select name="type" id="typeSelect">
+            <option value="daily">Her Gün</option>
+            <option value="weekdays">Belirli Günler</option>
+            <option value="delay">X Gün Sonra</option>
+          </select>
+        </label>
+        <div id="daysContainer" style="display:none;">
+          <div class="days-group">
+            <label><input type="checkbox" name="days" value="Mon">Pazartesi</label>
+            <label><input type="checkbox" name="days" value="Tue">Salı</label>
+            <label><input type="checkbox" name="days" value="Wed">Çarşamba</label>
+            <label><input type="checkbox" name="days" value="Thu">Perşembe</label>
+            <label><input type="checkbox" name="days" value="Fri">Cuma</label>
+            <label><input type="checkbox" name="days" value="Sat">Cumartesi</label>
+            <label><input type="checkbox" name="days" value="Sun">Pazar</label>
+          </div>
+        </div>
+        <label>Süre (gün)
+          <input type="number" name="duration" min="1" required>
+        </label>
+        <div style="font-size:13px;color:#666;margin-bottom:14px;">
+          <b>Bilgi:</b> Süre, takvim günü olarak hesaplanır. Örneğin 10 gün ve Salı/Cuma seçerseniz, 10 gün boyunca gelen her Salı ve Cuma mesaj gönderilir. (Yani 10 gün içinde 2 Salı varsa 2 mesaj gönderilir.)
+        </div>
+        <button type="submit">Kaydet</button>
+      </form>
+      <div id="result"></div>
+    </div>
+    <div class="side-panel" id="sideRemindersPanel">
+      <h2 style="color:#2a5d9f;text-align:center;font-size:20px;margin-bottom:16px;">Müşteri Listesi</h2>
+      <div id="remindersList"></div>
+    </div>
+  </div>
+  <div id="toast" style="display:none;position:fixed;top:32px;right:32px;z-index:9999;min-width:180px;max-width:320px;padding:16px 24px;background:#2a5d9f;color:#fff;font-weight:bold;border-radius:8px;box-shadow:0 4px 16px #0002;font-size:16px;transition:opacity 0.3s;opacity:0;pointer-events:none;text-align:center;"></div>
+  <div id="editModeBanner" style="display:none;background:#e3f0ff;color:#2a5d9f;font-weight:bold;text-align:center;padding:8px 0 6px 0;border-radius:7px 7px 0 0;margin-bottom:8px;">Düzenleme Modu: Kaydı güncelledikten sonra tekrar kayıt ekleyebilirsiniz.</div>
+  <script>
+    const typeSelect = document.getElementById('typeSelect');
+    const daysContainer = document.getElementById('daysContainer');
+    const showRemindersBtn = document.getElementById('showRemindersBtn');
+    const sideRemindersPanel = document.getElementById('sideRemindersPanel');
+    const remindersList = document.getElementById('remindersList');
+    const form = document.getElementById('reminderForm');
+    let remindersVisible = false;
+    let remindersData = [];
+
+    typeSelect.addEventListener('change', function() {
+      daysContainer.style.display = this.value === 'weekdays' ? 'block' : 'none';
+    });
+
+    showRemindersBtn.addEventListener('click', async function(e) {
+      e.preventDefault();
+      remindersVisible = !remindersVisible;
+      if(remindersVisible) {
+        showRemindersBtn.textContent = 'Müşteri Listesini Gizle';
+        sideRemindersPanel.classList.add('active');
+        remindersList.innerHTML = '<div style="text-align:center;color:#888;">Yükleniyor...</div>';
+        try {
+          const res = await fetch('http://localhost:3000/api/reminders');
+          const data = await res.json();
+          if(Array.isArray(data) && data.length > 0) {
+            remindersData = data;
+            remindersList.innerHTML = data.map(rem => `
+              <div style=\"background:#f7fafd;position:relative;border-radius:12px;padding:18px 18px 14px 18px;margin-bottom:16px;box-shadow:0 1px 4px #e3eaf2;min-height:120px;\">
+                <button class=\"delete-reminder-btn\" data-id=\"${rem.id}\" title=\"Kaydı Sil\" style=\"position:absolute;top:10px;right:10px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:#f3f3f3;color:#c00;border:none;font-size:15px;cursor:pointer;padding:0;border-radius:50%;transition:background 0.2s,color 0.2s;z-index:2;\" onmouseover=\"this.style.background='#ffeaea';this.style.color='#fff';this.style.backgroundColor='#c00'\" onmouseout=\"this.style.background='#f3f3f3';this.style.color='#c00';this.style.backgroundColor=''\">🗑️</button>
+                <button class=\"edit-reminder-btn\" data-id=\"${rem.id}\" title=\"Kaydı Düzenle\" style=\"position:absolute;top:10px;right:44px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:#f3f3f3;color:#2a5d9f;border:none;font-size:15px;cursor:pointer;padding:0 0 0 1px;border-radius:50%;transition:background 0.2s,color 0.2s;z-index:2;\" onmouseover=\"this.style.background='#e3f0ff';this.style.color='#fff';this.style.backgroundColor='#2a5d9f'\" onmouseout=\"this.style.background='#f3f3f3';this.style.color='#2a5d9f';this.style.backgroundColor=''\">✏️</button>
+                <div style=\"font-weight:bold;font-size:17px;margin-bottom:2px;word-break:break-word;\">${rem.name}</div>
+                <div style=\"color:#2a5d9f;font-size:13px;margin-bottom:6px;word-break:break-all;\">${rem.phone}</div>
+                <div style=\"font-size:14px;margin-bottom:6px;white-space:pre-line;word-break:break-word;\">${rem.message}</div>
+                <div style=\"font-size:12px;color:#888;\"><b>Başlangıç:</b> ${rem.startDateTime ? new Date(rem.startDateTime).toLocaleString('tr-TR') : '-'}</div>
+                <div style=\"font-size:12px;color:#888;\"><b>Tekrar:</b> ${rem.type === 'daily' ? 'Her Gün' : rem.type === 'weekdays' ? (rem.days ? rem.days.join(', ') : 'Belirli Günler') : 'X Gün Sonra'}</div>
+              </div>
+            `).join('');
+          } else {
+            remindersList.innerHTML = '<div style="text-align:center;color:#888;">Kayıtlı müşteri yok.</div>';
+          }
+        } catch {
+          remindersList.innerHTML = '<div style="text-align:center;color:#c00;">Liste alınamadı.</div>';
+        }
+        // Silme butonlarına event ekle
+        remindersList.querySelectorAll('.delete-reminder-btn').forEach(btn => {
+          btn.addEventListener('click', async function() {
+            const id = this.getAttribute('data-id');
+            if(confirm('Bu kaydı silmek istediğinize emin misiniz?')) {
+              try {
+                const res = await fetch(`http://localhost:3000/api/reminders/${id}`, { method: 'DELETE' });
+                if(res.ok) {
+                  this.closest('div').remove();
+                  alert('Kayıt silindi!');
+                } else {
+                  alert('Silme işlemi başarısız.');
+                }
+              } catch {
+                alert('Silme işlemi sırasında hata oluştu.');
+              }
+            }
+          });
+        });
+        // Düzenle butonlarına event ekle
+        remindersList.querySelectorAll('.edit-reminder-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            const rem = remindersData.find(r => r.id === id);
+            if(rem) {
+              form.name.value = rem.name;
+              form.phone.value = rem.phone;
+              form.message.value = rem.message;
+              form.startDateTime.value = rem.startDateTime ? rem.startDateTime.slice(0,16) : '';
+              form.type.value = rem.type;
+              if(rem.type === 'weekdays' && rem.days) {
+                daysContainer.style.display = 'block';
+                form.querySelectorAll('input[name="days"]').forEach(cb => {
+                  cb.checked = rem.days.includes(cb.value);
+                });
+              } else {
+                daysContainer.style.display = 'none';
+                form.querySelectorAll('input[name="days"]').forEach(cb => { cb.checked = false; });
+              }
+              form.duration.value = rem.duration;
+              form.setAttribute('data-edit-id', id);
+              document.getElementById('editModeBanner').style.display = 'block';
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          });
+        });
+      } else {
+        showRemindersBtn.textContent = 'Önceden Ayarlanmış Müşterileri Göster';
+        sideRemindersPanel.classList.remove('active');
+      }
+    });
+
+    document.getElementById('reminderForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const data = {
+        name: form.name.value,
+        phone: form.phone.value,
+        message: form.message.value,
+        startDateTime: form.startDateTime.value,
+        type: form.type.value,
+        duration: form.duration.value
+      };
+      if (form.type.value === 'weekdays') {
+        data.days = Array.from(form.querySelectorAll('input[name="days"]:checked')).map(cb => cb.value);
+      }
+      const editId = form.getAttribute('data-edit-id');
+      let res, result;
+      if(editId) {
+        res = await fetch(`http://localhost:3000/api/reminders/${editId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        result = await res.json();
+        if(res.ok) {
+          showToast('Kayıt güncellendi!');
+          form.reset();
+          form.removeAttribute('data-edit-id');
+          document.getElementById('editModeBanner').style.display = 'none';
+          daysContainer.style.display = 'none';
+          // Listeyi hemen güncelle
+          if(remindersVisible) {
+            await showRemindersBtn.click();
+            setTimeout(()=>showRemindersBtn.click(), 200);
+          }
+        } else {
+          showToast('Hata: ' + (result.error || 'Güncelleme başarısız.'), true);
+        }
+      } else {
+        res = await fetch('http://localhost:3000/api/reminders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        result = await res.json();
+        document.getElementById('result').innerText = res.ok ? 'Kayıt başarılı!' : 'Hata: ' + result.error;
+        if(res.ok) showToast('Kayıt başarılı!');
+        else showToast('Hata: ' + result.error, true);
+        daysContainer.style.display = 'none';
+        if(remindersVisible) {
+          await showRemindersBtn.click();
+          setTimeout(()=>showRemindersBtn.click(), 200);
+        }
+      }
+    });
+
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.style.background = isError ? '#c00' : '#2a5d9f';
+      toast.style.display = 'block';
+      toast.style.opacity = '1';
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => { toast.style.display = 'none'; }, 400);
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
+

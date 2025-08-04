@@ -2,7 +2,8 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>SmartPharm - Hatırlatıcı Kayıt</title>
+  <title>Marmara Eczanesi - Girişli Panel</title>
+  <script src="loginConfig.js"></script>
   <style>
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
@@ -103,15 +104,91 @@
       font-weight: 500;
       color: #2a5d9f;
     }
+    #loginPanel {
+      background: #fff;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      border-radius: 14px;
+      padding: 36px 32px 28px 32px;
+      margin: 60px auto 32px auto;
+      max-width: 350px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    #loginPanel h2 {
+      color: #2a5d9f;
+      font-size: 2rem;
+      margin-bottom: 18px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    #loginPanel input {
+      width: 100%;
+      padding: 12px;
+      border: 1.5px solid #cfd8dc;
+      border-radius: 7px;
+      font-size: 16px;
+      margin-bottom: 10px;
+      background: #f7fafd;
+      transition: border 0.2s;
+    }
+    #loginPanel input:focus {
+      border: 1.5px solid #2a5d9f;
+      outline: none;
+      background: #fff;
+    }
+    #loginPanel button {
+      width: 100%;
+      padding: 12px;
+      background: #2a5d9f;
+      color: #fff;
+      font-size: 17px;
+      font-weight: bold;
+      border: none;
+      border-radius: 7px;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: background 0.2s;
+    }
+    #loginPanel button:hover {
+      background: #1b3e6f;
+    }
+    #loginError {
+      color: #c00;
+      background: #ffeaea;
+      border-radius: 5px;
+      padding: 7px 0;
+      width: 100%;
+      text-align: center;
+      font-size: 15px;
+      margin-top: 4px;
+      margin-bottom: -8px;
+    }
     @media (max-width: 900px) {
       .main-flex { flex-direction: column; align-items: stretch; gap: 0; }
       .side-panel { width: 100%; max-width: 100vw; min-width: 0; margin-top: 24px; }
       .container { width: 100%; min-width: 0; }
     }
+    @media (max-width: 500px) {
+      #loginPanel {
+        max-width: 98vw;
+        padding: 18px 6vw 18px 6vw;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="main-flex">
+  <!-- Giriş Paneli -->
+  <div id="loginPanel">
+    <h2>Giriş Yap</h2>
+    <input type="text" id="loginUsername" placeholder="Kullanıcı Adı">
+    <input type="password" id="loginPassword" placeholder="Şifre">
+    <button onclick="login()">Giriş</button>
+    <div id="loginError"></div>
+  </div>
+  <!-- Asıl Panel (form ve müşteri listesi) -->
+  <div class="main-flex" style="display:none;">
     <div class="container">
       <h1>Marmara Eczanesi</h1>
       <div class="desc">Müşterileriniz için otomatik ve güvenli WhatsApp bilgilendirme hizmeti</div>
@@ -165,6 +242,26 @@
   <div id="toast" style="display:none;position:fixed;top:32px;right:32px;z-index:9999;min-width:180px;max-width:320px;padding:16px 24px;background:#2a5d9f;color:#fff;font-weight:bold;border-radius:8px;box-shadow:0 4px 16px #0002;font-size:16px;transition:opacity 0.3s;opacity:0;pointer-events:none;text-align:center;"></div>
   <div id="editModeBanner" style="display:none;background:#e3f0ff;color:#2a5d9f;font-weight:bold;text-align:center;padding:8px 0 6px 0;border-radius:7px 7px 0 0;margin-bottom:8px;">Düzenleme Modu: Kaydı güncelledikten sonra tekrar kayıt ekleyebilirsiniz.</div>
   <script>
+    function login() {
+      const username = document.getElementById('loginUsername').value;
+      const password = document.getElementById('loginPassword').value;
+      if (username === LOGIN_USER && password === LOGIN_PASS) {
+        localStorage.setItem('login_token', LOGIN_TOKEN);
+        document.getElementById('loginPanel').style.display = 'none';
+        document.querySelector('.main-flex').style.display = '';
+      } else {
+        document.getElementById('loginError').innerText = "Hatalı kullanıcı adı veya şifre!";
+      }
+    }
+    window.onload = function() {
+      if (localStorage.getItem('login_token') === LOGIN_TOKEN) {
+        document.getElementById('loginPanel').style.display = 'none';
+        document.querySelector('.main-flex').style.display = '';
+      } else {
+        document.querySelector('.main-flex').style.display = 'none';
+        document.getElementById('loginPanel').style.display = '';
+      }
+    };
     const typeSelect = document.getElementById('typeSelect');
     const daysContainer = document.getElementById('daysContainer');
     const showRemindersBtn = document.getElementById('showRemindersBtn');

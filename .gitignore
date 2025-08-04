@@ -2,3 +2,4 @@ node_modules/
 backend/firebaseKey.json
 .env
 .DS_Store
+loginConfig.js

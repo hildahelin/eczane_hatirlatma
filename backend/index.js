@@ -25,6 +25,21 @@ app.use((req, res, next) => {
   next();
 });
 
+// X-LOGIN-TOKEN kontrolü (çift koruma)
+const SECRET_TOKEN = "gizli-token-123";
+app.use((req, res, next) => {
+  const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress || '';
+  const ip = clientIp.replace('::ffff:', '');
+  const token = req.headers['x-login-token'];
+  if (!allowedIps.includes(ip)) {
+    return res.status(403).json({ error: 'Erişim reddedildi. Bu API sadece yetkili IP adreslerinden kullanılabilir.' });
+  }
+  if (token !== SECRET_TOKEN) {
+    return res.status(403).json({ error: 'Geçersiz veya eksik token.' });
+  }
+  next();
+});
+
 // Kayıt ekleme endpoint'i
 app.post('/api/reminders', async (req, res) => {
   try {

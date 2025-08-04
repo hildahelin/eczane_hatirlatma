@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Marmara Eczanesi - Girişli Panel</title>
+  <script src="loginConfig.js"></script>
+  <!-- ... diğer head kodların ... -->
+</head>
+<body>
+  <div id="loginPanel" style="max-width:340px;margin:40px auto;">
+    <h2>Giriş Yap</h2>
+    <input type="text" id="loginUsername" placeholder="Kullanıcı Adı" style="width:100%;margin-bottom:8px;">
+    <input type="password" id="loginPassword" placeholder="Şifre" style="width:100%;margin-bottom:8px;">
+    <button onclick="login()">Giriş</button>
+    <div id="loginError" style="color:#c00;margin-top:8px;"></div>
+  </div>
+  <div class="main-flex" style="display:none;">
+    <!-- ... mevcut form ve müşteri listesi kodların ... -->
+  </div>
+  <script>
+    function login() {
+      const username = document.getElementById('loginUsername').value;
+      const password = document.getElementById('loginPassword').value;
+      if (username === LOGIN_USER && password === LOGIN_PASS) {
+        localStorage.setItem('login_token', LOGIN_TOKEN);
+        document.getElementById('loginPanel').style.display = 'none';
+        document.querySelector('.main-flex').style.display = '';
+      } else {
+        document.getElementById('loginError').innerText = "Hatalı kullanıcı adı veya şifre!";
+      }
+    }
+    window.onload = function() {
+      if (localStorage.getItem('login_token') === LOGIN_TOKEN) {
+        document.getElementById('loginPanel').style.display = 'none';
+        document.querySelector('.main-flex').style.display = '';
+      } else {
+        document.querySelector('.main-flex').style.display = 'none';
+        document.getElementById('loginPanel').style.display = '';
+      }
+    };
+    // API isteklerinde token ekle (örnek POST)
+    async function postWithToken(url, data) {
+      return await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-LOGIN-TOKEN': localStorage.getItem('login_token') || ''
+        },
+        body: JSON.stringify(data)
+      });
+    }
+    // ... Diğer fetch isteklerinde de aynı şekilde header eklenmeli ...
+  </script>
+</body>
+</html>

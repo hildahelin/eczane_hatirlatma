@@ -6,11 +6,9 @@
   <script src="loginConfig.js"></script>
   <style>
     body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: #f4f6fb;
+      background: #f4f6fa;
       margin: 0;
-      padding: 0;
-      min-height: 100vh;
+      font-family: 'Segoe UI', 'Arial', sans-serif;
     }
     .main-flex {
       display: flex;
@@ -106,31 +104,30 @@
     }
     #loginPanel {
       background: #fff;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
-      border-radius: 14px;
-      padding: 36px 32px 28px 32px;
-      margin: 60px auto 32px auto;
-      max-width: 350px;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px #0002;
+      padding: 40px 32px 32px 32px;
+      max-width: 340px;
+      margin: 80px auto 0 auto;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
     }
     #loginPanel h2 {
+      margin-bottom: 24px;
       color: #2a5d9f;
       font-size: 2rem;
-      margin-bottom: 18px;
-      font-weight: bold;
+      font-weight: 700;
       letter-spacing: 1px;
     }
     #loginPanel input {
       width: 100%;
-      padding: 12px;
-      border: 1.5px solid #cfd8dc;
-      border-radius: 7px;
-      font-size: 16px;
-      margin-bottom: 10px;
-      background: #f7fafd;
+      padding: 10px 12px;
+      margin-bottom: 16px;
+      border: 1px solid #cfd8dc;
+      border-radius: 6px;
+      font-size: 1rem;
+      background: #f7fafc;
       transition: border 0.2s;
     }
     #loginPanel input:focus {
@@ -140,30 +137,24 @@
     }
     #loginPanel button {
       width: 100%;
-      padding: 12px;
+      padding: 10px 0;
       background: #2a5d9f;
       color: #fff;
-      font-size: 17px;
-      font-weight: bold;
       border: none;
-      border-radius: 7px;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 600;
       cursor: pointer;
-      margin-top: 6px;
       transition: background 0.2s;
     }
     #loginPanel button:hover {
       background: #1b3e6f;
     }
     #loginError {
-      color: #c00;
-      background: #ffeaea;
-      border-radius: 5px;
-      padding: 7px 0;
-      width: 100%;
-      text-align: center;
-      font-size: 15px;
-      margin-top: 4px;
-      margin-bottom: -8px;
+      color: #d32f2f;
+      margin-top: 8px;
+      font-size: 0.98rem;
+      min-height: 22px;
     }
     @media (max-width: 900px) {
       .main-flex { flex-direction: column; align-items: stretch; gap: 0; }
@@ -246,7 +237,7 @@
       const username = document.getElementById('loginUsername').value;
       const password = document.getElementById('loginPassword').value;
       if (username === LOGIN_USER && password === LOGIN_PASS) {
-        localStorage.setItem('login_token', LOGIN_TOKEN);
+        sessionStorage.setItem('login_token', LOGIN_TOKEN); // localStorage yerine sessionStorage
         document.getElementById('loginPanel').style.display = 'none';
         document.querySelector('.main-flex').style.display = '';
       } else {
@@ -254,7 +245,7 @@
       }
     }
     window.onload = function() {
-      if (localStorage.getItem('login_token') === LOGIN_TOKEN) {
+      if (sessionStorage.getItem('login_token') === LOGIN_TOKEN) { // localStorage yerine sessionStorage
         document.getElementById('loginPanel').style.display = 'none';
         document.querySelector('.main-flex').style.display = '';
       } else {
